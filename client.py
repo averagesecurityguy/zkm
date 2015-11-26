@@ -225,10 +225,10 @@ class ZKMClient(cmd.Cmd):
             print('[-] No public key available for {0}.'.format(their_public))
 
         else:
-            enc_msg = self._encrypt(self.config['secret'],
-                                    self.config['public'],
-                                    their_public,
-                                    'message: {0}'.format(message))
+            enc_msg = encrypt(self.config['secret'],
+                              self.config['public'],
+                              their_public,
+                              'message: {0}'.format(message))
 
             resp = send('POST', '/message', {'message': enc_msg})
             print('[+] {0}'.format(resp))
