@@ -53,7 +53,7 @@ certificate:
 Or configure the Flask server to run behind Apache, Nginx, or Lighttpd using
 one of the many deployment options listed here:
 
-    http://flask.pocoo.org/docs/0.10/deploying/
+http://flask.pocoo.org/docs/0.10/deploying/
 
 Again, make sure you use a valid TLS certificate. Once the server running,
 you can use the client to create contact lists, send messages, and receive
@@ -73,14 +73,14 @@ The first thing you need to do is run the connect command and provide the full
 URL for the ZKM server with which you want to communicate. The interactive ZKM
 shell supports the following commands:
 
-    * connect
-    * add_contact
-    * del_contact
-    * show_contacts
-    * show_config
-    * create_message
-    * read_messages
-    * quit/exit/ctrl-d
+* connect
+* add_contact
+* del_contact
+* show_contacts
+* show_config
+* create_message
+* read_messages
+* quit/exit/ctrl-d
 
 
 Can I Use This Commercially?
