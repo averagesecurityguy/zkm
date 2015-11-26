@@ -34,6 +34,7 @@ All configuration and contact data is stored in the .zkm directory.
 Prerequisites
 -------------
 ZKM requires the following:
+
     * Python3
     * Flask
     * libsodium
