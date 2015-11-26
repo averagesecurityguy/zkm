@@ -47,13 +47,13 @@ def encrypt(our_secret, our_public, their_public, msg):
     their_public = base64.b64decode(their_public)
     our_secret = base64.b64decode(our_secret)
     nonce = pysodium.randombytes(pysodium.crypto_box_NONCEBYTES)
-    enc = pysodium.crypto_box(msg, nonce, their_public, our_secret)
+    enc = pysodium.crypto_box(msg.encode('utf8'), nonce, their_public, our_secret)
 
-    nonce = base64.b64encode(nonce)
-    enc = base64.b64encode(enc)
+    nonce = base64.b64encode(nonce).decode('utf8')
+    enc = base64.b64encode(enc).decode('utf8')
 
     # Return our public_key, nonce, and the encrypted message
-    return ':'.join(our_public, nonce, enc)
+    return ':'.join([our_public, nonce, enc])
 
 
 def decrypt(our_secret, msg):
@@ -92,11 +92,11 @@ def send(server, method, endpoint, data=None):
     Send a message to the server and process the response.
     """
     url = '{0}{1}'.format(server, endpoint)
+    resp = None
 
     if method == 'POST':
         resp = requests.post(url, data=data)
-
-    if method == 'GET':
+    else:
         resp = requests.get(url, params=data)
 
     if resp.status_code == 200:
@@ -218,7 +218,7 @@ class ZKMClient(cmd.Cmd):
         """
         line = line.split(' ')
         username = line[0]
-        message = ' '.join(line[1:].decode('utf8'))
+        message = ' '.join(line[1:])
         their_public = self.contacts.get(username, None)
 
         if their_public is None:
@@ -230,10 +230,10 @@ class ZKMClient(cmd.Cmd):
                               their_public,
                               'message: {0}'.format(message))
 
-            resp = send('POST', '/message', {'message': enc_msg})
+            resp = send(self.config['server'], 'POST', '/message', {'message': enc_msg})
             print('[+] {0}'.format(resp))
 
-    def do_read_messages(self):
+    def do_read_messages(self, line):
         """
         Get all messages and attempt to decrypt them.
 
@@ -243,7 +243,7 @@ class ZKMClient(cmd.Cmd):
         """
         since = self.config.get('since', 1)
 
-        resp = send('GET', '/messages', {'since': since})
+        resp = send(self.config['server'], 'GET', '/messages', {'since': since})
 
         for enc_msg in resp:
             since = enc_msg['id']
