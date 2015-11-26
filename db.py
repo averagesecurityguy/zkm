@@ -27,8 +27,7 @@ class ZKMDatabase():
         """
         self.cur.execute('SELECT max(id) from messages')
         lastrowid = self.cur.fetchone()
-        print('lastrowid: {0}'.format(lastrowid))
-        return lastrowid
+        return lastrowid[0]
 
     def get_messages(self, since):
         """
@@ -37,8 +36,8 @@ class ZKMDatabase():
         Log an error message and re raise it if there is a failure.
         """
         # Guarantee we do not return more than MAXMSGS for performance sake.
-        if since < self._lastrowid - MAX_RETURN:
-            since = self._lastrowid - MAX_RETURN
+        if int(since) < self._lastrowid() - MAX_RETURN:
+            since = self._lastrowid() - MAX_RETURN
 
         try:
             self.log.debug('Getting messages since {0}.'.format(since))
@@ -70,8 +69,7 @@ class ZKMDatabase():
         Keep no more than MAX_KEEP messages.
         """
         try:
-
-            discard = self._lastrowid - MAX_KEEP
+            discard = self._lastrowid() - MAX_KEEP
 
             self.log.debug('Cleaning up messages.')
             self.cur.execute('DELETE FROM messages WHERE since<?', (discard,))
