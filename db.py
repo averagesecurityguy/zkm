@@ -28,8 +28,8 @@ class ZKMDatabase():
         Log an error message and re raise it if there is a failure.
         """
         # Guarantee we do not return more than MAXMSGS for performance sake.
-        if since < self.conn.lastrowid - MAX_RETURN:
-            since = self.conn.lastrowid - MAX_RETURN
+        if since < self.cur.lastrowid - MAX_RETURN:
+            since = self.cur.lastrowid - MAX_RETURN
 
         try:
             self.log.debug('Getting messages since {0}.'.format(since))
@@ -61,7 +61,7 @@ class ZKMDatabase():
         Keep no more than MAX_KEEP messages.
         """
         try:
-            discard = self.conn.lastrowid - MAX_KEEP
+            discard = self.cur.lastrowid - MAX_KEEP
 
             self.log.debug('Cleaning up messages.')
             self.cur.execute('DELETE FROM messages WHERE since<?', (discard,))
