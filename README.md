@@ -40,15 +40,10 @@ ZKM requires the following:
     * pysodium
     * requests
 
-### Installing libsodium
+### Installing Prerequisites Debian/Kali
 
-    http://doc.libsodium.org/installation/index.html
-
-### Installing Other Prerequisites
-
-    apt-get install python3 python3-pip
+    apt-get install python3 python3-pip libsodium13
     pip3 install flask requests pysodium
-    http://doc.libsodium.org/installation/index.html
 
 
 Server Usage
