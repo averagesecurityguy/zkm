@@ -18,7 +18,7 @@ class ZKMDatabase():
     def __init__(self):
         self.conn = sqlite3.connect('zkm.sqlite')
         self.cur = self.conn.cursor()
-        self.cur.execute("CREATE TABLE IF NOT EXISTS messages (id integer primary key autoincrement , message text)")
+        self.cur.execute("CREATE TABLE IF NOT EXISTS messages (id integer primary key autoincrement not null , message text)")
         self.log = logging.Logger('DB')
 
     def get_messages(self, since):
