@@ -247,7 +247,7 @@ class ZKMClient(cmd.Cmd):
 
         for enc_msg in resp:
             since = enc_msg[0]
-            their_public, dec_msg = decrypt(enc_msg[1])
+            their_public, dec_msg = decrypt(self.config['secret'], enc_msg[1])
 
             # Decryption was successful print the message
             if dec_msg.startswith('message: '):
