@@ -257,7 +257,7 @@ class ZKMClient(cmd.Cmd):
         """
         Usage quit | exit | ctrl-d
 
-        Quit the Ada client.
+        Quit the ZKM client.
         """
         return True
 
