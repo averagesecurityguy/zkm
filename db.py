@@ -49,7 +49,7 @@ class ZKMDatabase():
         """
         try:
             self.log.debug('Creating new message {0}.'.format(msg))
-            self.cur.execute('INSERT INTO messages VALUES (?)', (msg,))
+            self.cur.execute('INSERT INTO messages VALUES (?, ?)', (None, msg))
             self.conn.commit()
 
         except Exception as e:
