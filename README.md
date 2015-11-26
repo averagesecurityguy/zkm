@@ -35,9 +35,20 @@ Prerequisites
 -------------
 ZKM requires the following:
     * Python3
+    * Flask
     * libsodium
     * pysodium
     * requests
+
+### Installing libsodium
+
+    http://doc.libsodium.org/installation/index.html
+
+### Installing Other Prerequisites
+
+    apt-get install python3 python3-pip
+    pip3 install flask requests pysodium
+    http://doc.libsodium.org/installation/index.html
 
 
 Server Usage
