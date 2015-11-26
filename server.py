@@ -51,7 +51,7 @@ def create_message():
         zdb = db.ZKMDatabase()
         msg = flask.request.form['message']
         zdb.create_message(msg)
-        response(None, 'Success')
+        return response(None, 'Success')
 
     except db.DatabaseException() as e:
         return response(e, None)
