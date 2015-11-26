@@ -27,7 +27,7 @@ def load_json_file(filename):
         data = f.read()
 
     try:
-        return json.loads(data)
+        return json.loads(data.decode('utf8'))
     except:
         return {}
 
@@ -37,7 +37,7 @@ def save_json_data(filename, data):
     Save the given data to a file in JSON format.
     """
     with open(filename, 'wb') as f:
-        f.write('{0}\n'.format(json.dumps(data)))
+        f.write('{0}\n'.format(json.dumps(data)).encode('utf8'))
 
 
 def encrypt(our_secret, our_public, their_public, msg):
@@ -124,8 +124,8 @@ def initialize():
         our_public, our_secret = pysodium.crypto_sign_keypair()
 
         print('[+] Creating configuration file.')
-        config = {'public': base64.b64encode(our_public),
-                  'secret': base64.b64encode(our_secret),
+        config = {'public': base64.b64encode(our_public).decode('utf8'),
+                  'secret': base64.b64encode(our_secret).decode('utf8'),
                   'since': 1}
 
         save_json_data(CONFIG, config)
@@ -155,6 +155,7 @@ class ZKMClient(cmd.Cmd):
         except:
             print('[-] ZKM not initialized yet.')
             initialize()
+            self.config = load_json_file(CONFIG)
 
         try:
             self.contacts = load_json_file(CONTACT)
@@ -193,9 +194,10 @@ class ZKMClient(cmd.Cmd):
         Print the current configuration information.
         """
         print('Current configuration')
-        print('  Public Key: {0}'.format(self.config['public']))
-        print('  ZKM Server: {0}'.format(self.config['server']))
-        print('  Last Check: {0}'.format(self.config['since']))
+        print('---------------------')
+        print('  Public Key: {0}'.format(self.config.get('public')))
+        print('  ZKM Server: {0}'.format(self.config.get('server')))
+        print('  Last Check: {0}'.format(self.config.get('since')))
         print()
 
     def do_show_contacts(self, line):
@@ -203,6 +205,7 @@ class ZKMClient(cmd.Cmd):
         Print the current list of contacts.
         """
         print('Contacts')
+        print('--------')
         for contact in self.contacts:
             print('  {0}: {1}'.format(contact, self.contacts[contact]))
 
