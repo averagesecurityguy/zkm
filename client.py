@@ -243,7 +243,7 @@ class ZKMClient(cmd.Cmd):
         """
         since = self.config.get('since', 1)
 
-        resp = send(self.config['server'], 'GET', '/messages', {'since': since})
+        resp = send(self.config['server'], 'GET', '/messages/{0}'.format(since))
 
         for enc_msg in resp:
             since = enc_msg['id']
