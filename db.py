@@ -21,6 +21,15 @@ class ZKMDatabase():
         self.cur.execute("CREATE TABLE IF NOT EXISTS messages (id integer primary key autoincrement not null , message text)")
         self.log = logging.Logger('DB')
 
+    def _lastrowid(self):
+        """
+        Get the last row id from the messages table.
+        """
+        self.cur.execute('SELECT max(id) from messages')
+        lastrowid = self.cur.fetchone()
+        print('lastrowid: {0}'.format(lastrowid))
+        return lastrowid
+
     def get_messages(self, since):
         """
         Get a list of messages whose id is greater than or equal to since.
@@ -28,8 +37,8 @@ class ZKMDatabase():
         Log an error message and re raise it if there is a failure.
         """
         # Guarantee we do not return more than MAXMSGS for performance sake.
-        if since < self.cur.lastrowid - MAX_RETURN:
-            since = self.cur.lastrowid - MAX_RETURN
+        if since < self._lastrowid - MAX_RETURN:
+            since = self._lastrowid - MAX_RETURN
 
         try:
             self.log.debug('Getting messages since {0}.'.format(since))
@@ -61,7 +70,8 @@ class ZKMDatabase():
         Keep no more than MAX_KEEP messages.
         """
         try:
-            discard = self.cur.lastrowid - MAX_KEEP
+
+            discard = self._lastrowid - MAX_KEEP
 
             self.log.debug('Cleaning up messages.')
             self.cur.execute('DELETE FROM messages WHERE since<?', (discard,))
