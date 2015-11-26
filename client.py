@@ -218,7 +218,7 @@ class ZKMClient(cmd.Cmd):
         """
         line = line.split(' ')
         username = line[0]
-        message = ' '.join(line[1:])
+        message = ' '.join(line[1:].decode('utf8'))
         their_public = self.contacts.get(username, None)
 
         if their_public is None:
