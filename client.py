@@ -65,7 +65,7 @@ def decrypt(our_secret, msg):
     their_public = base64.b64decode(their_public)
     nonce = base64.b64decode(nonce)
     enc_msg = base64.b64decode(enc_msg)
-    dec_msg = pysodium.crypto_box_open(enc_msg, nonce, their_public, our_secret)
+    dec_msg = pysodium.crypto_box_open(enc_msg.encode('utf8'), nonce, their_public, our_secret)
 
     # Return the sender's public key and the decrypted message.
     return their_public, dec_msg
