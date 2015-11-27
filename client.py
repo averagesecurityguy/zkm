@@ -40,37 +40,39 @@ def save_json_data(filename, data):
         f.write('{0}\n'.format(json.dumps(data)).encode('utf8'))
 
 
-def encrypt(our_secret, our_public, their_public, msg):
+def encrypt(ssk, spk, rpk, msg):
     """
     Encrypt a message using the provided information.
     """
-    their_public = base64.b64decode(their_public)
-    our_secret = base64.b64decode(our_secret)
+    ssk = base64.b64decode(ssk)
+    rpk = base64.b64decode(rpk)
     nonce = pysodium.randombytes(pysodium.crypto_box_NONCEBYTES)
-    enc = pysodium.crypto_box_easy(msg, nonce, their_public, our_secret)
+    enc = pysodium.crypto_box_easy(msg, nonce, rpk, ssk)
 
+    spk = base64.b64encode(spk)
     nonce = base64.b64encode(nonce)
     enc = base64.b64encode(enc)
 
-    # Return our public_key, nonce, and the encrypted message
-    return b':'.join([our_public, nonce, enc])
+    # Return sender's public_key, nonce, and the encrypted message
+    return b':'.join([spk, nonce, enc])
 
 
-def decrypt(our_secret, msg):
+def decrypt(rsk, msg):
     """
     Decrypt a message using the provided information.
     """
-    their_public, nonce, enc_msg = msg.split(b':')
+    print('Decrypt')
+    spk, nonce, enc_msg = msg.split(b':')
 
-    our_secret = base64.b64decode(our_secret)
-    their_public = base64.b64decode(their_public)
+    spk = base64.b64decode(spk)
+    rsk = base64.b64decode(rsk)
     nonce = base64.b64decode(nonce)
     enc_msg = base64.b64decode(enc_msg)
 
-    dec_msg = pysodium.crypto_box_open_easy(enc_msg, nonce, their_public, our_secret)
+    dec_msg = pysodium.crypto_box_open_easy(enc_msg, nonce, spk, rsk)
 
     # Return the sender's public key and the decrypted message.
-    return their_public, dec_msg
+    return spk, dec_msg
 
 
 def print_msg(contacts, their_public, msg):
@@ -126,8 +128,8 @@ def initialize():
         our_public, our_secret = pysodium.crypto_box_keypair()
 
         print('[+] Creating configuration file.')
-        config = {'public': base64.b64encode(our_public).decode('utf8'),
-                  'secret': base64.b64encode(our_secret).decode('utf8'),
+        config = {'public': base64.b64encode(our_public),
+                  'secret': base64.b64encode(our_secret),
                   'since': 1}
 
         save_json_data(CONFIG, config)
