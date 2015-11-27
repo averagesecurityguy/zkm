@@ -128,8 +128,8 @@ def initialize():
         our_public, our_secret = pysodium.crypto_box_keypair()
 
         print('[+] Creating configuration file.')
-        config = {'public': base64.b64encode(our_public),
-                  'secret': base64.b64encode(our_secret),
+        config = {'public': base64.b64encode(our_public).decode('utf8'),
+                  'secret': base64.b64encode(our_secret).decode('utf8'),
                   'since': 1}
 
         save_json_data(CONFIG, config)
@@ -229,8 +229,8 @@ class ZKMClient(cmd.Cmd):
             print('[-] No public key available for {0}.'.format(their_public))
 
         else:
-            enc_msg = encrypt(self.config['secret'],
-                              self.config['public'],
+            enc_msg = encrypt(self.config['secret'].encode('utf8'),
+                              self.config['public'].encode('utf8'),
                               their_public,
                               'message: {0}'.format(message))
 
@@ -251,7 +251,7 @@ class ZKMClient(cmd.Cmd):
 
         for enc_msg in resp:
             since = enc_msg[0]
-            their_public, dec_msg = decrypt(self.config['secret'], enc_msg[1])
+            their_public, dec_msg = decrypt(self.config['secret'].encode('utf8'), enc_msg[1])
 
             # Decryption was successful print the message
             if dec_msg.startswith('message: '):
