@@ -60,12 +60,14 @@ def decrypt(our_secret, msg):
     """
     Decrypt a message using the provided information.
     """
-    our_secret = base64.b64decode(our_secret)
     their_public, nonce, enc_msg = msg.split(':')
-    their_public = base64.b64decode(their_public)
-    nonce = base64.b64decode(nonce)
+
+    our_secret = base64.b64decode(our_secret).encode('utf8')
+    their_public = base64.b64decode(their_public).encode('utf8')
+    nonce = base64.b64decode(nonce).encode('utf8')
     enc_msg = base64.b64decode(enc_msg)
-    dec_msg = pysodium.crypto_box_open(enc_msg.encode('utf8'), nonce, their_public, our_secret)
+
+    dec_msg = pysodium.crypto_box_open(enc_msg, nonce, their_public, our_secret)
 
     # Return the sender's public key and the decrypted message.
     return their_public, dec_msg
