@@ -19,26 +19,28 @@ CONFIG = os.path.join(ZKMDIR, 'config')
 CONTACT = os.path.join(ZKMDIR, 'contacts')
 
 
-def load_json_file(filename):
+def load_data(filename):
     """
-    Load a json file into a dictionary and return it.
+    Load a key:value file into a dictionary and return it.
     """
+    data = {}
     with open(filename, 'rb') as f:
-        data = f.read()
+        for line in f:
+            line = line.rstrip(b'\r\n')
+            k, v = line.split(b':')
+            data[k] = v
 
-    try:
-        return json.loads(data.decode('utf8'))
-    except:
-        return {}
+    return data
 
 
-def save_json_data(filename, data):
+def save_data(filename, data):
     """
-    Save the given data to a file in JSON format.
+    Save the given data to a file in key:value format.
     """
     with open(filename, 'wb') as f:
-        jstr = json.dumps(data, ensure_ascii=False, encoding='utf8')
-        f.write('{0}\n'.format(jstr))
+        for k, v in data.items():
+            f.write(b':'.join([k, v]))
+            f.write(b'\n')
 
 
 def encrypt(ssk, spk, rpk, msg):
@@ -131,15 +133,15 @@ def initialize():
         our_public, our_secret = pysodium.crypto_box_keypair()
 
         print('[+] Creating configuration file.')
-        config = {'public': base64.b64encode(our_public),
-                  'secret': base64.b64encode(our_secret),
-                  'since': 1}
+        config = {b'public': base64.b64encode(our_public),
+                  b'secret': base64.b64encode(our_secret),
+                  b'since': b'1'}
 
-        save_json_data(CONFIG, config)
+        save_data(CONFIG, config)
         os.chmod(CONFIG, 0o600)
 
         print('[+] Creating contacts file.')
-        save_json_data(CONTACT, {})
+        save_data(CONTACT, {})
         os.chmod(CONTACT, 0o600)
 
     else:
@@ -158,43 +160,43 @@ class ZKMClient(cmd.Cmd):
         Initialize the ZKM client if necessary.
         """
         try:
-            self.config = load_json_file(CONFIG)
+            self.config = load_data(CONFIG)
         except:
             print('[-] ZKM not initialized yet.')
             initialize()
-            self.config = load_json_file(CONFIG)
+            self.config = load_data(CONFIG)
 
         try:
-            self.contacts = load_json_file(CONTACT)
+            self.contacts = load_data(CONTACT)
         except Exception:
             print('[-] Could not load contacts file.')
             self.contacts = []
 
     def postloop(self):
-        save_json_data(CONFIG, self.config)
-        save_json_data(CONTACT, self.contacts)
+        save_data(CONFIG, self.config)
+        save_data(CONTACT, self.contacts)
 
     def do_add_contact(self, line):
         """
         Add a new contact to the contact list.
         """
         name, their_public = line.split(' ')
-        self.contacts[name] = their_public
-        save_json_data(CONTACT, self.contacts)
+        self.contacts[bytes(name, 'utf8')] = bytes(their_public, 'utf8')
+        save_data(CONTACT, self.contacts)
 
     def do_del_contact(self, name):
         """
         Remove a contact from the contact list.
         """
         self.contacts.pop(name, None)
-        save_json_data(CONTACT, self.contacts)
+        save_data(CONTACT, self.contacts)
 
     def do_connect(self, line):
         """
         Define the server we want to connect to for messages.
         """
-        self.config['server'] = line
-        save_json_data(CONFIG, self.config)
+        self.config[b'server'] = bytes(line, 'utf8')
+        save_data(CONFIG, self.config)
 
     def do_show_config(self, line):
         """
@@ -249,7 +251,7 @@ class ZKMClient(cmd.Cmd):
         adjustable in the db.py script.
         """
         print(self.config)
-        since = self.config.get('since', 1)
+        since = self.config.get('since', '1')
         resp = send(self.config['server'], 'GET', '/messages/{0}'.format(since))
 
         for enc_msg in resp:
