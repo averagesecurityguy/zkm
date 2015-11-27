@@ -62,9 +62,9 @@ def decrypt(our_secret, msg):
     """
     their_public, nonce, enc_msg = msg.split(':')
 
-    our_secret = base64.b64decode(our_secret).encode('utf8')
-    their_public = base64.b64decode(their_public).encode('utf8')
-    nonce = base64.b64decode(nonce).encode('utf8')
+    our_secret = base64.b64decode(our_secret).decode('utf8')
+    their_public = base64.b64decode(their_public).decode('utf8')
+    nonce = base64.b64decode(nonce).decode('utf8')
     enc_msg = base64.b64decode(enc_msg)
 
     dec_msg = pysodium.crypto_box_open(enc_msg, nonce, their_public, our_secret)
