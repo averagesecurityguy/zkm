@@ -37,7 +37,8 @@ def save_json_data(filename, data):
     Save the given data to a file in JSON format.
     """
     with open(filename, 'wb') as f:
-        f.write('{0}\n'.format(json.dumps(data)).encode('utf8'))
+        jstr = json.dumps(data, ensure_ascii=False, encoding='utf8')
+        f.write('{0}\n'.format(jstr))
 
 
 def encrypt(ssk, spk, rpk, msg):
@@ -47,21 +48,20 @@ def encrypt(ssk, spk, rpk, msg):
     ssk = base64.b64decode(ssk)
     rpk = base64.b64decode(rpk)
     nonce = pysodium.randombytes(pysodium.crypto_box_NONCEBYTES)
+
     enc = pysodium.crypto_box_easy(msg, nonce, rpk, ssk)
 
-    spk = base64.b64encode(spk)
     nonce = base64.b64encode(nonce)
     enc = base64.b64encode(enc)
 
     # Return sender's public_key, nonce, and the encrypted message
-    return b':'.join([spk, nonce, enc])
+    return b':'.join([spk.encode('utf8'), nonce, enc])
 
 
 def decrypt(rsk, msg):
     """
     Decrypt a message using the provided information.
     """
-    print('Decrypt')
     spk, nonce, enc_msg = msg.split(b':')
 
     spk = base64.b64decode(spk)
@@ -70,6 +70,7 @@ def decrypt(rsk, msg):
     enc_msg = base64.b64decode(enc_msg)
 
     dec_msg = pysodium.crypto_box_open_easy(enc_msg, nonce, spk, rsk)
+    print(dec_msg.decode())
 
     # Return the sender's public key and the decrypted message.
     return spk, dec_msg
@@ -88,7 +89,9 @@ def print_msg(contacts, their_public, msg):
         else:
             sender = their_public
 
-    print('{0}: {1}'.format(sender, msg))
+    print('{0}'.format(sender))
+    print('-' * len(sender))
+    print(msg)
 
 
 def send(server, method, endpoint, data=None):
@@ -128,8 +131,8 @@ def initialize():
         our_public, our_secret = pysodium.crypto_box_keypair()
 
         print('[+] Creating configuration file.')
-        config = {'public': base64.b64encode(our_public).decode('utf8'),
-                  'secret': base64.b64encode(our_secret).decode('utf8'),
+        config = {'public': base64.b64encode(our_public),
+                  'secret': base64.b64encode(our_secret),
                   'since': 1}
 
         save_json_data(CONFIG, config)
@@ -229,8 +232,8 @@ class ZKMClient(cmd.Cmd):
             print('[-] No public key available for {0}.'.format(their_public))
 
         else:
-            enc_msg = encrypt(self.config['secret'].encode('utf8'),
-                              self.config['public'].encode('utf8'),
+            enc_msg = encrypt(self.config['secret'],
+                              self.config['public'],
                               their_public,
                               'message: {0}'.format(message))
 
@@ -245,16 +248,19 @@ class ZKMClient(cmd.Cmd):
         return no more than the last 200 messages by default. This value is
         adjustable in the db.py script.
         """
+        print(self.config)
         since = self.config.get('since', 1)
-
         resp = send(self.config['server'], 'GET', '/messages/{0}'.format(since))
 
         for enc_msg in resp:
             since = enc_msg[0]
-            their_public, dec_msg = decrypt(self.config['secret'].encode('utf8'), enc_msg[1])
+            crypt = enc_msg[1].encode('utf8')  # Needs to be bytes not str
+
+            their_public, dec_msg = decrypt(self.config['secret'], crypt)
 
             # Decryption was successful print the message
             if dec_msg.startswith('message: '):
+                print('Printing message')
                 print_msg(their_public, dec_msg)
 
         # Update since value in the config
