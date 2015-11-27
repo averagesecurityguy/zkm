@@ -123,7 +123,7 @@ def initialize():
         os.mkdir(ZKMDIR, 0o750)
 
         print('[+] Creating new keypair.')
-        our_public, our_secret = pysodium.crypto_sign_keypair()
+        our_public, our_secret = pysodium.crypto_box_keypair()
 
         print('[+] Creating configuration file.')
         config = {'public': base64.b64encode(our_public).decode('utf8'),
