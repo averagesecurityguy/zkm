@@ -84,14 +84,15 @@ URL for the ZKM server with which you want to communicate. The interactive ZKM
 shell supports the following commands:
 
 ### Commands
-`connect server_url` - Add the ZKM server to the configuration file.
-`add_contact name base64_encoded_public_key` - Associate a public key with a username.
-`del_contact name` - Delete a contact by name.
-`show_contacts` - List all contacts.
-`show_config` - Show the current configuration.
-`create_message username message` - Create a new message for the specified username. If the username is not listed in the contacts an error will occur.
-`read_messages` - Read all messages since last read. Will read 200 messages max.
-`quit/exit/ctrl-d` - Quit the application
+
+    `connect server_url` - Add the ZKM server to the configuration file.
+    `add_contact name base64_encoded_public_key` - Associate a public key with a username.
+    `del_contact name` - Delete a contact by name.
+    `show_contacts` - List all contacts.
+    `show_config` - Show the current configuration.
+    `create_message username message` - Create a new message for the specified username. If the username is not listed in the contacts an error will occur.
+    `read_messages` - Read all messages since last read. Will read 200 messages max.
+    `quit/exit/ctrl-d` - Quit the application
 
 
 Can I Use This Commercially?
