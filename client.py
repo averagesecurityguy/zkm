@@ -238,8 +238,8 @@ class ZKMClient(cmd.Cmd):
             print('[-] No public key available for {0}.'.format(their_public))
 
         else:
-            enc_msg = encrypt(self.config['secret'],
-                              self.config['public'],
+            enc_msg = encrypt(self.config[b'secret'],
+                              self.config[b'public'],
                               their_public,
                               'message: {0}'.format(message))
 
@@ -256,21 +256,22 @@ class ZKMClient(cmd.Cmd):
         """
         print(self.config)
         since = self.config.get(b'since', b'1')
-        resp = send(self.config['server'], 'GET', '/messages/{0}'.format(since))
+        resp = send(self.config[b'server'], 'GET', '/messages/{0}'.format(since))
 
         for enc_msg in resp:
             since = enc_msg[0]
             crypt = enc_msg[1].encode('utf8')  # Needs to be bytes not str
 
-            their_public, dec_msg = decrypt(self.config['secret'], crypt)
+            their_public, dec_msg = decrypt(self.config[b'secret'], crypt)
 
             # Decryption was successful print the message
-            if dec_msg.startswith('message: '):
+            print('Searching for messages.')
+            if dec_msg.startswith(b'message: '):
                 print('Printing message')
                 print_msg(their_public, dec_msg)
 
         # Update since value in the config
-        self.config['since'] = since
+        self.config[b'since'] = since
 
     def do_EOF(self, line):
         """
