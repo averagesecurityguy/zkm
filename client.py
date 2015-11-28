@@ -265,8 +265,6 @@ class ZKMClient(cmd.Cmd):
 
             their_public, dec_msg = decrypt(self.config[b'secret'], crypt)
 
-            print(dec_msg)
-
             # Decryption was successful print the message
             if dec_msg.startswith('message: '):
                 print_msg(self.contacts, their_public, dec_msg)
