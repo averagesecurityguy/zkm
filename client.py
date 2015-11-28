@@ -225,10 +225,14 @@ class ZKMClient(cmd.Cmd):
         Create a new encrypted message using the public key associated with
         name.
         """
-        line = line.split(' ')
-        username = line[0]
-        message = ' '.join(line[1:])
-        their_public = self.contacts.get(username, None)
+        line = bytes(line, 'utf8')
+        line = line.split(b' ')
+        username = line[0]  # This will either be a username or a public key
+        message = b' '.join(line[1:])
+
+        # Return either the public key associated with the username or the
+        # public key given in the command.
+        their_public = self.contacts.get(username, username)
 
         if their_public is None:
             print('[-] No public key available for {0}.'.format(their_public))
@@ -251,7 +255,7 @@ class ZKMClient(cmd.Cmd):
         adjustable in the db.py script.
         """
         print(self.config)
-        since = self.config.get('since', '1')
+        since = self.config.get(b'since', b'1')
         resp = send(self.config['server'], 'GET', '/messages/{0}'.format(since))
 
         for enc_msg in resp:
