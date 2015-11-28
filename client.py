@@ -237,7 +237,7 @@ class ZKMClient(cmd.Cmd):
         their_public = self.contacts.get(username, None)
 
         if their_public is None:
-            print('[-] No public key available for {0}.'.format(their_public))
+            print('[-] No public key available for user.')
 
         else:
             enc_msg = encrypt(self.config[b'secret'],
