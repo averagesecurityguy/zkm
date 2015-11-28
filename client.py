@@ -72,10 +72,9 @@ def decrypt(rsk, msg):
     enc_msg = base64.b64decode(enc_msg)
 
     dec_msg = pysodium.crypto_box_open_easy(enc_msg, nonce, spk, rsk)
-    print(dec_msg.decode())
 
     # Return the sender's public key and the decrypted message.
-    return spk, dec_msg
+    return base64.b64encode(spk), dec_msg
 
 
 def print_msg(contacts, their_public, msg):
@@ -85,13 +84,13 @@ def print_msg(contacts, their_public, msg):
     Lookup the public key of the sender to see if they are in our
     contacts. If they are print the username, if not print the public key.
     """
-    for username, contact_public in contacts.iteritems():
+    for username, contact_public in contacts.items():
         if their_public == contact_public:
             sender = username
         else:
             sender = their_public
 
-    print('{0}'.format(sender))
+    print('{0}'.format(sender.decode()))
     print('-' * len(sender))
     print(msg)
 
@@ -100,7 +99,7 @@ def send(server, method, endpoint, data=None):
     """
     Send a message to the server and process the response.
     """
-    url = '{0}{1}'.format(server.decode('utf8'), endpoint)
+    url = '{0}{1}'.format(server.decode(), endpoint)
     resp = None
 
     if method == 'POST':
@@ -225,14 +224,13 @@ class ZKMClient(cmd.Cmd):
         Create a new encrypted message using the public key associated with
         name.
         """
-        line = bytes(line, 'utf8')
-        line = line.split(b' ')
+        line = line.split(' ')
         username = line[0]  # This will either be a username or a public key
-        message = b' '.join(line[1:])
+        message = ' '.join(line[1:])
 
         # Return either the public key associated with the username or the
         # public key given in the command.
-        their_public = self.contacts.get(username, username)
+        their_public = self.contacts.get(username, username.encode())
 
         if their_public is None:
             print('[-] No public key available for {0}.'.format(their_public))
@@ -254,24 +252,24 @@ class ZKMClient(cmd.Cmd):
         return no more than the last 200 messages by default. This value is
         adjustable in the db.py script.
         """
-        print(self.config)
-        since = self.config.get(b'since', b'1')
+        since = int(self.config.get(b'since', b'1'))
         resp = send(self.config[b'server'], 'GET', '/messages/{0}'.format(since))
 
         for enc_msg in resp:
             since = enc_msg[0]
-            crypt = enc_msg[1].encode('utf8')  # Needs to be bytes not str
+            crypt = enc_msg[1].encode()  # Needs to be bytes not str
 
             their_public, dec_msg = decrypt(self.config[b'secret'], crypt)
 
-            # Decryption was successful print the message
-            print('Searching for messages.')
-            if dec_msg.startswith(b'message: '):
-                print('Printing message')
-                print_msg(their_public, dec_msg)
+            print(dec_msg)
 
-        # Update since value in the config
-        self.config[b'since'] = since
+            # Decryption was successful print the message
+            if dec_msg.startswith('message: '):
+                print_msg(self.contacts, their_public, dec_msg)
+
+            # Update since value in the config with the next value. Need to
+            # convert to bytes as well.
+            self.config[b'since'] = str(since + 1).encode()
 
     def do_EOF(self, line):
         """
