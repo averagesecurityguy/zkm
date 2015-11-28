@@ -27,7 +27,7 @@ def load_data(filename):
     with open(filename, 'rb') as f:
         for line in f:
             line = line.rstrip(b'\n')
-            k, v = line.split(b':')
+            k, v = line.split(b'|')
             data[k] = v
 
     return data
@@ -39,7 +39,7 @@ def save_data(filename, data):
     """
     with open(filename, 'wb') as f:
         for k, v in data.items():
-            f.write(b':'.join([k, v]))
+            f.write(b'|'.join([k, v]))
             f.write(b'\n')
 
 
