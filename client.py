@@ -26,7 +26,7 @@ def load_data(filename):
     data = {}
     with open(filename, 'rb') as f:
         for line in f:
-            line = line.rstrip(b'\r\n')
+            line = line.rstrip(b'\n')
             k, v = line.split(b':')
             data[k] = v
 
@@ -204,9 +204,9 @@ class ZKMClient(cmd.Cmd):
         """
         print('Current configuration')
         print('---------------------')
-        print('  Public Key: {0}'.format(self.config.get('public')))
-        print('  ZKM Server: {0}'.format(self.config.get('server')))
-        print('  Last Check: {0}'.format(self.config.get('since')))
+        print('  Public Key: {0}'.format(self.config.get(b'public')))
+        print('  ZKM Server: {0}'.format(self.config.get(b'server')))
+        print('  Last Check: {0}'.format(self.config.get(b'since')))
         print()
 
     def do_show_contacts(self, line):
