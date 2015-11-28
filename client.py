@@ -243,7 +243,7 @@ class ZKMClient(cmd.Cmd):
                               their_public,
                               'message: {0}'.format(message))
 
-            resp = send(self.config['server'], 'POST', '/message', {'message': enc_msg})
+            resp = send(self.config[b'server'], 'POST', '/message', {'message': enc_msg})
             print('[+] {0}'.format(resp))
 
     def do_read_messages(self, line):
