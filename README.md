@@ -30,6 +30,9 @@ file with your key pair.
 
 All configuration and contact data is stored in the .zkm directory.
 
+Releases
+--------
+All Releases are code named after famous cryptographers as listed on this wiki page: https://en.wikipedia.org/wiki/List_of_cryptographers
 
 Prerequisites
 -------------
@@ -80,14 +83,15 @@ The first thing you need to do is run the connect command and provide the full
 URL for the ZKM server with which you want to communicate. The interactive ZKM
 shell supports the following commands:
 
-* connect
-* add_contact
-* del_contact
-* show_contacts
-* show_config
-* create_message
-* read_messages
-* quit/exit/ctrl-d
+### Commands
+`connect server_url` - Add the ZKM server to the configuration file.
+`add_contact name base64_encoded_public_key` - Associate a public key with a username.
+`del_contact name` - Delete a contact by name.
+`show_contacts` - List all contacts.
+`show_config` - Show the current configuration.
+`create_message username message` - Create a new message for the specified username. If the username is not listed in the contacts an error will occur.
+`read_messages` - Read all messages since last read. Will read 200 messages max.
+`quit/exit/ctrl-d` - Quit the application
 
 
 Can I Use This Commercially?
