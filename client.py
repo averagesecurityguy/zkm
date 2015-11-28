@@ -229,12 +229,12 @@ class ZKMClient(cmd.Cmd):
         name.
         """
         line = line.split(' ')
-        username = line[0]  # This will either be a username or a public key
+        username = line[0].encode()  # This will either be a username or a public key
         message = ' '.join(line[1:])
 
         # Return either the public key associated with the username or the
         # public key given in the command.
-        their_public = self.contacts.get(username, username.encode())
+        their_public = self.contacts.get(username, None)
 
         if their_public is None:
             print('[-] No public key available for {0}.'.format(their_public))
@@ -274,6 +274,8 @@ class ZKMClient(cmd.Cmd):
             # Update since value in the config with the next value. Need to
             # convert to bytes as well.
             self.config[b'since'] = str(since + 1).encode()
+
+        save_data(CONFIG, self.config)
 
     def do_EOF(self, line):
         """
