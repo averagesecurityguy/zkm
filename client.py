@@ -100,8 +100,7 @@ def send(server, method, endpoint, data=None):
     """
     Send a message to the server and process the response.
     """
-    url = '{0}{1}'.format(server, endpoint)
-    url = url.decode('utf8')  # Requests wants a string not bytes.
+    url = '{0}{1}'.format(server.decode('utf8'), endpoint)
     resp = None
 
     if method == 'POST':
