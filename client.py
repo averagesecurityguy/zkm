@@ -71,7 +71,11 @@ def decrypt(rsk, msg):
     nonce = base64.b64decode(nonce)
     enc_msg = base64.b64decode(enc_msg)
 
-    dec_msg = pysodium.crypto_box_open_easy(enc_msg, nonce, spk, rsk)
+    # A ValueError is raised when decryption fails. Need to cactch it.
+    try:
+        dec_msg = pysodium.crypto_box_open_easy(enc_msg, nonce, spk, rsk)
+    except ValueError:
+        dec_msg = ''
 
     # Return the sender's public key and the decrypted message.
     return base64.b64encode(spk), dec_msg
