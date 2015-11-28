@@ -57,7 +57,7 @@ def encrypt(ssk, spk, rpk, msg):
     enc = base64.b64encode(enc)
 
     # Return sender's public_key, nonce, and the encrypted message
-    return b':'.join([spk.encode('utf8'), nonce, enc])
+    return b':'.join([spk, nonce, enc])
 
 
 def decrypt(rsk, msg):
