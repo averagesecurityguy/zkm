@@ -27,14 +27,19 @@ def response(error, response):
 
 # Every user gets every message. Not all messages can be decrypted by every
 # user.
-@app.route('/messages/<since>')
-def get_messages(since):
+@app.route('/messages/', defaults={'channel': None})
+@app.route('/messages/<channel>', defaults={'since': None})
+@app.route('/messages/<channel>/<since>')
+def get_messages(channel=None, since=None):
     """
     Get all of the message published on or after the since value.
     """
+    if (channel is None) or (since is None):
+        return response("Must specify a channel and since value", None)
+
     try:
         zdb = db.ZKMDatabase()
-        msgs = zdb.get_messages(since)
+        msgs = zdb.get_messages(channel, since)
         return response(None, msgs)
 
     except db.DatabaseException() as e:
@@ -42,15 +47,15 @@ def get_messages(since):
 
 
 # Anyone can create a message.
-@app.route('/message', methods=['POST'])
-def create_message():
+@app.route('/message/<channel>', methods=['POST'])
+def create_message(channel):
     """
     Create a new message.
     """
     try:
         zdb = db.ZKMDatabase()
         msg = flask.request.form['message']
-        zdb.create_message(msg)
+        zdb.create_message(channel, msg)
         return response(None, 'Success')
 
     except db.DatabaseException() as e:

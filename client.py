@@ -8,7 +8,6 @@ import requests
 import pysodium
 import os
 import base64
-import json
 import cmd
 
 
@@ -138,7 +137,8 @@ def initialize():
         print('[+] Creating configuration file.')
         config = {b'public': base64.b64encode(our_public),
                   b'secret': base64.b64encode(our_secret),
-                  b'since': b'1'}
+                  b'since': b'1',
+                  b'channel': b'default'}
 
         save_data(CONFIG, config)
         os.chmod(CONFIG, 0o600)
@@ -201,6 +201,25 @@ class ZKMClient(cmd.Cmd):
         self.config[b'server'] = bytes(line, 'utf8')
         save_data(CONFIG, self.config)
 
+    def do_channel(self, line):
+        """
+        Update the config file with the channel we want to connect to for
+        messages.
+        """
+        self.config[b'channel'] = bytes(line, 'utf8')
+        save_data(CONFIG, self.config)
+
+    def do_create_channel(self, line):
+        """
+        Create a random channel name (hex number) and set the new channel in
+        the configuration.
+        """
+        channel = base64.b16encode(pysodium.randombytes(16)).lower()
+        self.config[b'channel'] = channel
+        save_data(CONFIG, self.config)
+
+        print('[+] Channel ID {0} added to configuration.'.format(channel))
+
     def do_show_config(self, line):
         """
         Print the current configuration information.
@@ -210,6 +229,7 @@ class ZKMClient(cmd.Cmd):
         print('  Public Key: {0}'.format(self.config.get(b'public')))
         print('  ZKM Server: {0}'.format(self.config.get(b'server')))
         print('  Last Check: {0}'.format(self.config.get(b'since')))
+        print('  Channel: {0}'.format(self.config.get(b'channel')))
         print()
 
     def do_show_contacts(self, line):
@@ -232,21 +252,28 @@ class ZKMClient(cmd.Cmd):
         username = line[0].encode()  # This will either be a username or a public key
         message = ' '.join(line[1:])
 
-        # Return either the public key associated with the username or the
-        # public key given in the command.
+        # Return the public key associated with the username
         their_public = self.contacts.get(username, None)
-
         if their_public is None:
             print('[-] No public key available for user.')
+            return
 
-        else:
-            enc_msg = encrypt(self.config[b'secret'],
-                              self.config[b'public'],
-                              their_public,
-                              'message: {0}'.format(message))
+        channel = self.config.get(b'channel', None)
+        if channel is None:
+            print('[-] No channel specified.')
+            return
 
-            resp = send(self.config[b'server'], 'POST', '/message', {'message': enc_msg})
-            print('[+] {0}'.format(resp))
+        enc_msg = encrypt(self.config[b'secret'],
+                          self.config[b'public'],
+                          their_public,
+                          'message: {0}'.format(message))
+
+        resp = send(self.config[b'server'],
+                    'POST',
+                    '/message/{0}'.format(self.config[b'channel'].decode()),
+                    {'message': enc_msg})
+
+        print('[+] {0}'.format(resp))
 
     def do_read_messages(self, line):
         """
@@ -257,7 +284,11 @@ class ZKMClient(cmd.Cmd):
         adjustable in the db.py script.
         """
         since = int(self.config.get(b'since', b'1'))
-        resp = send(self.config[b'server'], 'GET', '/messages/{0}'.format(since))
+        channel = self.config.get(b'channel', None)
+
+        resp = send(self.config[b'server'],
+                    'GET',
+                    '/messages/{0}/{1}'.format(channel.decode(), since.decode()))
 
         for enc_msg in resp:
             since = enc_msg[0]

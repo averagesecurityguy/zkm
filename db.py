@@ -18,7 +18,7 @@ class ZKMDatabase():
     def __init__(self):
         self.conn = sqlite3.connect('zkm.sqlite')
         self.cur = self.conn.cursor()
-        self.cur.execute("CREATE TABLE IF NOT EXISTS messages (id integer primary key autoincrement not null , message text)")
+        self.cur.execute("CREATE TABLE IF NOT EXISTS messages (id integer primary key autoincrement not null , channel text, message text)")
         self.log = logging.Logger('DB')
 
     def _lastrowid(self):
@@ -29,7 +29,7 @@ class ZKMDatabase():
         lastrowid = self.cur.fetchone()
         return lastrowid[0]
 
-    def get_messages(self, since):
+    def get_messages(self, channel, since):
         """
         Get a list of messages whose id is greater than or equal to since.
 
@@ -41,14 +41,14 @@ class ZKMDatabase():
 
         try:
             self.log.debug('Getting messages since {0}.'.format(since))
-            self.cur.execute('SELECT * FROM messages WHERE id>=?', (since,))
+            self.cur.execute('SELECT * FROM messages WHERE channel=? AND id>=?', (channel, since))
             return self.cur.fetchall()
 
         except Exception as e:
             self.log.error('{0}'.format(e))
             raise DatabaseException('Could not get messages.')
 
-    def create_message(self, msg):
+    def create_message(self, channel, msg):
         """
         Add message to the database.
 
@@ -56,8 +56,8 @@ class ZKMDatabase():
         not.
         """
         try:
-            self.log.debug('Creating new message {0}.'.format(msg))
-            self.cur.execute('INSERT INTO messages VALUES (?, ?)', (None, msg))
+            self.log.debug('Creating new message {0} in channel {1}.'.format(msg, channel))
+            self.cur.execute('INSERT INTO messages VALUES (?, ?, ?)', (None, channel, msg))
             self.conn.commit()
 
         except Exception as e:
