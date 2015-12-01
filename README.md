@@ -49,6 +49,10 @@ ZKM requires the following:
     apt-get install python3 python3-pip libsodium13
     pip3 install flask requests pysodium
 
+Some versions of Ubuntu do not have the libsodium13 package. If that is the case then you can install libsodium using the directions here:
+
+    http://doc.libsodium.org/installation/index.html
+
 
 Server Usage
 ------------
