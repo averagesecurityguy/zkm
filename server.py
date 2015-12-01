@@ -27,8 +27,6 @@ def response(error, response):
 
 # Every user gets every message. Not all messages can be decrypted by every
 # user.
-@app.route('/messages/', defaults={'channel': None})
-@app.route('/messages/<channel>', defaults={'since': None})
 @app.route('/messages/<channel>/<since>')
 def get_messages(channel=None, since=None):
     """
