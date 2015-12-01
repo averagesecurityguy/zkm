@@ -284,11 +284,11 @@ class ZKMClient(cmd.Cmd):
         adjustable in the db.py script.
         """
         since = int(self.config.get(b'since', b'1'))
-        channel = self.config.get(b'channel', None)
+        channel = self.config.get(b'channel', b'default')
 
         resp = send(self.config[b'server'],
                     'GET',
-                    '/messages/{0}/{1}'.format(channel.decode(), since.decode()))
+                    '/messages/{0}/{1}'.format(channel.decode(), since))
 
         for enc_msg in resp:
             since = enc_msg[0]
