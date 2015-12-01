@@ -41,7 +41,7 @@ class ZKMDatabase():
 
         try:
             self.log.debug('Getting messages since {0}.'.format(since))
-            self.cur.execute('SELECT * FROM messages WHERE channel=? AND id>=?', (channel, since))
+            self.cur.execute('SELECT id, message FROM messages WHERE channel=? AND id>=?', (channel, since))
             return self.cur.fetchall()
 
         except Exception as e:
